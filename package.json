@@ -1,0 +1,50 @@
+{
+  "name": "ng-fire-test-models",
+  "version": "3.0.12",
+  "description": "Base framework for testing MVC Models based on angularfire2.5 ang Angular 2.5.",
+  "author": "aleek",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "gulp dev --cwd . && karma start",
+    "dev:ci": "gulp dev:ci --cwd . && karma start --single-run",
+    "dev:ci:phantomjs": "gulp dev:ci --cwd . && karma start --browsers PhantomJS --single-run",
+    "test": "karma start"
+  },
+  "dependencies": {
+    "@angular/common": "^5.0.0",
+    "@angular/compiler": "5.2.8",
+    "@angular/core": "^5.0.0",
+    "@angular/platform-browser": "^5.0.0",
+    "@angular/platform-browser-dynamic": "^5.0.0",
+    "@firebase/app": "^0.1.10",
+    "@firebase/app-types": "^0.1.2",
+    "@firebase/auth-types": "^0.1.2",
+    "@firebase/database-types": "^0.1.2",
+    "@firebase/firestore-types": "^0.2.2",
+    "@firebase/messaging-types": "^0.1.2",
+    "@firebase/storage-types": "^0.1.2",
+    "@types/core-js": "^0.9.39",
+    "@types/jasmine": "^2.5.37",
+    "@types/node": "^7.0.13",
+    "angularfire2": "^5.0.0-rc.6",
+    "core-js": "^2.4.1",
+    "firebase": "^4.10.1",
+    "jasmine-core": "^2.6.0",
+    "karma": "^1.5.0",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-jasmine": "^1.0.2",
+    "karma-mocha-reporter": "^2.2.5",
+    "karma-typescript": "^3.0.12",
+    "karma-typescript-angular2-transform": "latest",
+    "rxjs": "^5.3.0",
+    "typescript": "latest",
+    "zone.js": "^0.8.8"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "karma-phantomjs-launcher": "^1.0.2",
+    "puppeteer": "^1.1.1",
+    "webpack": "^4.1.1"
+  }
+}
