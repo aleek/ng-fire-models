@@ -1,3 +1,4 @@
+import { Constraints, ConstraintsTypes} from 'validate.js';
 import { DocumentReference} from '@firebase/firestore-types'
 
 export interface UserSchema {
@@ -14,6 +15,12 @@ export interface UserSchema {
   gender: string;
   timezone: string;
   bio: string;
+}
+
+export var UserConstraints:Constraints = {
+    displayname: {
+        presence: true
+    }
 }
 
 /*

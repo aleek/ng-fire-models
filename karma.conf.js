@@ -33,6 +33,7 @@ module.exports = function(config) {
         reporters: ['mocha'],
 
         browsers: ["ChromeHeadless"]
+        //browsers: ["Chrome"]
         
     });
 };

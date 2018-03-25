@@ -39,6 +39,7 @@
     "karma-typescript-angular2-transform": "latest",
     "rxjs": "^5.3.0",
     "typescript": "latest",
+    "validate.js": "https://github.com/aleek/validate.js#typings",
     "zone.js": "^0.8.8"
   },
   "devDependencies": {
