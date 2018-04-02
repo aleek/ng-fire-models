@@ -19,6 +19,8 @@ export class User {
    */
   public static afs: AngularFirestore; // = null;
 
+  private uid: string;
+
 
   public static getById(id: string): Rx.Observable<User> {
     return Rx.Observable.empty();
@@ -28,10 +30,17 @@ export class User {
     return null;
   }
 
-  public constructor(protected model: UserSchema, private doc: AngularFirestoreDocument<UserSchema>, private fbuser: firebase.User) {
-    if (model == null || doc == null || fbuser == null) {
-      throw new Error("Cannot create User object with empty contructor parameters");
+  public constructor(protected model: UserSchema, private doc: AngularFirestoreDocument<UserSchema>, protected fbuser: firebase.User) {
+    if (model == null) {
+      throw new Error("Cannot create User object with empty model parameter");
     }
+    else if (doc == null) {
+      throw new Error("Cannot create User object with empty doc parameter");
+    }
+    else if (fbuser == null) {
+      throw new Error("Cannot create User object with empty fbuser parameter");
+    }
+    this.uid = fbuser.uid;
   }
 
 
@@ -45,7 +54,7 @@ export class User {
    * @readonly
    */
   get id(): string {
-    return this.id;
+    return this.uid;
   }
 
   /*
@@ -81,9 +90,9 @@ export class User {
     return this.model.gender;
   }
 
-/*   get ref(): DocumentReference {
-    return this.afo.ref;
-  } */
+  /*   get ref(): DocumentReference {
+      return this.afo.ref;
+    } */
 }
 
 /*
@@ -101,19 +110,18 @@ export class LoggedUser extends User {
 
   //private afo:AngularFirestoreDocument<UserSchema>;
 
-   public static initialize(auth: AngularFireAuth, firestore: AngularFirestore) {
+  public static initialize(auth: AngularFireAuth, firestore: AngularFirestore) {
     LoggedUser.auth = auth;
     LoggedUser.firestore = firestore;
 
-   // LoggedUser.auth.authState.map(LoggedUser.processAuthStateChange); //.mergeMap(LoggedUser.processAuthStateChange1, LoggedUser.processAuthStateChange2);
-  } 
+    // LoggedUser.auth.authState.map(LoggedUser.processAuthStateChange); //.mergeMap(LoggedUser.processAuthStateChange1, LoggedUser.processAuthStateChange2);
+  }
 
   public static createNewFromEmailAndPassword(email: string, password: string): Rx.Observable<firebase.User> {
     if (!LoggedUser.initialized()) {
       throw "LoggedUser.auth property is missing";
     }
     return <Observable<firebase.User>>Observable.fromPromise(this.auth.auth.createUserWithEmailAndPassword(email, password));
-    //var b = a.catch((error:string) => Observable.of(error)).subscribe((error:string) => console.error(error));
   }
 
   public static signInFromEmailAndPassword(email: string, password: string): Rx.Observable<LoggedUser> {
@@ -124,10 +132,12 @@ export class LoggedUser extends User {
     return null;
   }
 
-  public static fromFirebaseUser(fbuser:firebase.User): Rx.Observable<LoggedUser> {
+  public static fromFirebaseUser(fbuser: firebase.User): Rx.Observable<LoggedUser> {
     if (fbuser) {
       let doc = LoggedUser.firestore.doc<UserSchema>("users/" + fbuser.uid);
       return doc.valueChanges().take(1).map((model: UserSchema) => {
+        console.log("MODELLLL");
+        console.log(model);
         return new LoggedUser(model, doc, fbuser);
       });
     }
@@ -135,35 +145,44 @@ export class LoggedUser extends User {
   }
 
   /**
+   * @todo remomber to support reauthenticate user
+   * https://firebase.google.com/docs/auth/web/manage-users#re-authenticate_a_user
+   */
+  public deleteAccount(): Rx.Observable<any> {
+    return Rx.Observable.fromPromise(this.fbuser.delete());
+  }
+
+  /**
    * processAuthStateChange 
    * @param fbuser 
    */
-  private static processAuthStateChange(fbuser: firebase.User, index:number): Rx.Observable<LoggedUser> {
+  private static processAuthStateChange(fbuser: firebase.User, index: number): Rx.Observable<LoggedUser> {
     if (fbuser) {
       let doc = LoggedUser.firestore.doc<UserSchema>("users/" + fbuser.uid);
       return doc.valueChanges().take(1).map((model: UserSchema) => {
+        console.log("MODEL" + model);
         return new LoggedUser(model, doc, fbuser);
       });
     }
     return Rx.Observable.empty();
   }
 
-/*   private static processAuthStateChange1(fbuser: firebase.User, i: number): Rx.Observable<UserSchema> {
-    if (fbuser) {
-      let doc = LoggedUser.firestore.doc<UserSchema>("users/" + fbuser.uid);
+  /*   private static processAuthStateChange1(fbuser: firebase.User, i: number): Rx.Observable<UserSchema> {
+      if (fbuser) {
+        let doc = LoggedUser.firestore.doc<UserSchema>("users/" + fbuser.uid);
+      }
     }
-  }
-
-  private static processAuthStateChange2(fbuser: firebase.User, um: UserSchema, fbindex: number, umindex: number) {
-    return new LoggedUser(um, ref, fbuser);
-  } */
+  
+    private static processAuthStateChange2(fbuser: firebase.User, um: UserSchema, fbindex: number, umindex: number) {
+      return new LoggedUser(um, ref, fbuser);
+    } */
 
   public constructor(model: UserSchema, doc: AngularFirestoreDocument<UserSchema>, fbuser: firebase.User) {
     super(model, doc, fbuser);
 
   }
 
-  private static initialized():boolean {
+  private static initialized(): boolean {
     return (LoggedUser.auth != null) && (LoggedUser.firestore != null);
   }
 }

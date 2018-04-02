@@ -1,5 +1,5 @@
 process.env.CHROME_BIN = require('puppeteer').executablePath()
-module.exports = function(config) {
+module.exports = function (config) {
     config.set({
 
         frameworks: ["jasmine", "karma-typescript"],
@@ -22,18 +22,25 @@ module.exports = function(config) {
                 exclude: [
                     "@firebase/app-types",
                     "@firebase/firestore-types"
-                ]
+                ],
+                sourceMap: true,
             },
             compilerOptions: {
-                lib: ["ES2015", "DOM"]
+                lib: ["ES2015", "DOM"],
+                sourceMap: true,
+            },
+            coverageOptions: {
+                instrumentation: true
             }
         },
+        //logLevel: config.LOG_DEBUG,
+        singleRun: true,
 
         //reporters: ["dots", "karma-typescript"],
         reporters: ['mocha'],
 
         browsers: ["ChromeHeadless"]
         //browsers: ["Chrome"]
-        
+
     });
 };

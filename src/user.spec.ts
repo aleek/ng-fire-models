@@ -9,7 +9,7 @@ import { User, LoggedUser } from './user'
 import { environment } from './environment'
 import { AngularFireAuth, AngularFireAuthProvider } from 'angularfire2/auth';
 import { Observable } from 'rxjs/Observable';
-
+import { UserSchema } from './schema';
 
 declare let Zone: any;
 
@@ -18,7 +18,8 @@ describe("User", () => {
   let afs: AngularFirestore;
   let auth: AngularFireAuth;
   let srv: AuthService;
-  beforeEach(() => {
+
+  beforeAll(() => {
     TestBed.configureTestingModule({
       imports: [
         AngularFireModule.initializeApp(environment.firebase),
@@ -37,33 +38,108 @@ describe("User", () => {
         srv = _srv;
       })();
   });
-  afterEach(async (done) => {
+
+  afterAll(async (done) => {
     await app.delete();
     done();
   });
+
+  // Ensure we've got an initialized app
+  it("receives an initialized app from firebase", () => expect(app).not.toBe(null));
 
   it("should be true", () => {
     expect(true).toBe(true);
   });
 
-  it("should not create empty User", () => {
-    var u = function () {
-      return new User(null, null, null);
-    };
+  let user: LoggedUser;
+  it("should create user from email and password", (done: DoneFn) => {
+    LoggedUser.createNewFromEmailAndPassword("user1@example.com", "123456")
+    .subscribe((fbuser:firebase.User) => {
+      expect(fbuser).not.toBeNull();
+    },
+    (error: string) => {
+      console.error(error);
+      done.fail(error);
+    });
 
-    expect(u).toThrowError(Error);
+    srv.currentUser.subscribe((u: LoggedUser) => {
+      expect(u).not.toBeNull();
+      user = u;
+      done();
+    },
+      (error: any) => {
+        console.error(error);
+        done.fail(error);
+      });
   });
 
-  it("should create user from email and password", (done: DoneFn) => {
-    var obs = LoggedUser.createNewFromEmailAndPassword("aledutko@com.pl", "123456");
-    obs.subscribe((fbuser: firebase.User) => {
-      expect(fbuser).not.toBeNull();
+  it("should delete user", (done: DoneFn) => {
+    user.deleteAccount().subscribe(() => {
       done();
     },
       (error: any) => {
         done.fail(error);
+      })
+  });
+
+  /*   it("shoudl obtain user info", (done: DoneFn) => {
+    }); */
+
+  /*   it("should delete add users", (done: DoneFn) => {
+      let nextPageToken;
+      adminApp.auth().listUsers(10, nextPageToken).then((listUserResults: admin.auth.ListUsersResult) => {
+        listUserResults.users.forEach(function (userRecord) {
+          console.debug(userRecord.toJSON());
+        });
+  
+        done();
+      }).catch(function (error) {
+        console.log("Error listing users:", error);
+        done();
       });
+  
     });
+  
+  
+    it("should not create empty User", () => {
+      var u = function () {
+        return new User(null, null, null);
+      };
+  
+      expect(u).toThrowError(Error);
+    }); */
+
+});
+
+/* it("should create corresponding Firestore entry, after creating a user", (done: DoneFn) => {
+  var obs = LoggedUser.createNewFromEmailAndPassword("aledutk2o@com.pl", "123456");
+  let user;
+  let doc = obs.mergeMap((fbuser: firebase.User) => {
+    expect(fbuser).not.toBeNull();
+    let doc = afs.doc<UserSchema>("users/" + fbuser.uid);
+    return doc.valueChanges().take(1);
+
+    //fbuser.delete(); // this is async
+    //done();
+  }, (fbuser: firebase.User, model: UserSchema, fi: number, ui: number) => {
+    user = fbuser;
+    return model;
+  });
+
+  doc.subscribe((model: UserSchema) => {
+    console.log(model);
+  },
+    (error: any) => {
+      done.fail(error)
+    });
+  /*     ,
+        (error: any) => {
+          done.fail(error);
+        }); 
+}); */
+
+
+//});
 
 
 
@@ -72,4 +148,3 @@ describe("User", () => {
           LoggedUser.signInFromEmailAndPassword("aleek@com.pl", "1234");
     
         }) */
-  }); 
