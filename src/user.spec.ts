@@ -53,33 +53,67 @@ describe("User", () => {
 
   let user: LoggedUser;
   it("should create user from email and password", (done: DoneFn) => {
-    LoggedUser.createNewFromEmailAndPassword("user1@example.com", "123456")
-    .subscribe((fbuser:firebase.User) => {
-      expect(fbuser).not.toBeNull();
-    },
-    (error: string) => {
-      console.error(error);
-      done.fail(error);
-    });
-
-    srv.currentUser.subscribe((u: LoggedUser) => {
-      expect(u).not.toBeNull();
-      user = u;
-      done();
-    },
-      (error: any) => {
-        console.error(error);
-        done.fail(error);
+    var signup = LoggedUser.createNewFromEmailAndPassword("user1@example.com", "123456");
+    var luser = srv.currentUser
+      .map((u: LoggedUser, index: number) => {
+        if (u) {
+          user = u;
+          return true;
+        }
+        else {
+          user = null;
+          return false;
+        }
       });
+
+    var success = signup.combineLatest(luser, (signUpSuccess: boolean, userSuccess: boolean) => {
+      return signUpSuccess && userSuccess;
+    }).subscribe((result: boolean) => {
+      if (result) {
+        done();
+      }
+    })
+
+    /*       .subscribe((fbuser: boolean) => {
+            expect(fbuser).toBeTruthy();
+            done();
+          },
+          (error: string) => {
+            done.fail(error);
+          }); */
+    // @TODO merge those observables;
+    /*     srv.currentUser.subscribe((u: LoggedUser) => {
+          expect(u).not.toBeNull();
+          user = u;
+          done();
+        },
+          (error: any) => {
+            done.fail(error);
+          }); */
   });
 
   it("should delete user", (done: DoneFn) => {
-    user.deleteAccount().subscribe(() => {
+    if (user == null) {
       done();
-    },
-      (error: any) => {
-        done.fail(error);
-      })
+    }
+    else {
+      user.deleteAccount().subscribe(() => {
+        done();
+      },
+        (error: any) => {
+          done.fail(error);
+        });
+    }
+  });
+  it("should not create user with invalid email", (done: DoneFn) => {
+    LoggedUser.createNewFromEmailAndPassword("user1example.com", "123456")
+      .subscribe((fbuser: boolean) => {
+        expect(fbuser).not.toBeTruthy();
+        done();
+      },
+      (error: string) => {
+        done();
+      });
   });
 
   /*   it("shoudl obtain user info", (done: DoneFn) => {

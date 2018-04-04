@@ -10,6 +10,10 @@ import { UserSchema } from "./schema"
 import * as Rx from 'rxjs/Rx';
 import { Observable } from 'rxjs/Observable';
 
+interface Error {
+  code: string;
+  message: string;
+}
 /**
  * Habababa
  */
@@ -107,23 +111,71 @@ export class LoggedUser extends User {
   private static auth: AngularFireAuth = null;
   private static firestore: AngularFirestore;
 
-
-  //private afo:AngularFirestoreDocument<UserSchema>;
-
+  /**
+   * The class must be initialized before using. This is not very clean solution
+   * and we need to implement better one.
+   * Currently, initialization is done by AuthService
+   * @TODO implement better solution
+   * @param auth AngularFireAuth instance
+   * @param firestore AngularFirestore instance
+   */
   public static initialize(auth: AngularFireAuth, firestore: AngularFirestore) {
     LoggedUser.auth = auth;
     LoggedUser.firestore = firestore;
-
-    // LoggedUser.auth.authState.map(LoggedUser.processAuthStateChange); //.mergeMap(LoggedUser.processAuthStateChange1, LoggedUser.processAuthStateChange2);
   }
 
-  public static createNewFromEmailAndPassword(email: string, password: string): Rx.Observable<firebase.User> {
+  private static initialized(): boolean {
+    return (LoggedUser.auth != null) && (LoggedUser.firestore != null);
+  }
+
+  /**
+   * Firebase to our error mapping
+   */
+  public static readonly authErrorMsgs: {
+    [code: string]: Error
+  } = {
+      "auth/email-already-in-use": { code: "auth/email-already-in-use", message: "Unfortunately, this email is already in use." },
+      "auth/invalid-email": { code: "auth/invalid-email", message: "It seems like this email address is not properly written. If you are certain that it is OK, please contact our support." },
+      "auth/operation-not-allowed": { code: "auth/operation-not-allowed", message: "We are very sorry, but you are not allowed to perform this operation." },
+      "auth/weak-password": { code: "auth/weak-password", message: "The password you entered is too weak." },
+      "auth/unknown": { code: "auth/unknown", message: "We don't exacly know what's happend, but we are working on it!. Please try again in couple of minutes." },
+    };
+
+  /**
+   * Creates new account. User must then fill its personal data
+   * @param email 
+   * @param password 
+   * @return true if successfully created an account, Error object if error.
+   */
+  public static createNewFromEmailAndPassword(email: string, password: string): Rx.Observable<boolean> {
     if (!LoggedUser.initialized()) {
       throw "LoggedUser.auth property is missing";
     }
-    return <Observable<firebase.User>>Observable.fromPromise(this.auth.auth.createUserWithEmailAndPassword(email, password));
+
+    return <Observable<boolean>>Observable.fromPromise(this.auth.auth.createUserWithEmailAndPassword(email, password))
+      .map((fbuser: firebase.User) => {
+        if (fbuser) {
+          return true;
+        }
+        return false;
+      })
+      .catch((error: firebase.auth.Error) => {
+        let err: Error;
+        if (LoggedUser.authErrorMsgs.hasOwnProperty(error.code)) {
+          err = LoggedUser.authErrorMsgs[error.code];
+        }
+        else {
+          err = LoggedUser.authErrorMsgs['auth/unknown'];
+        }
+        return Observable.throw(err);
+      });
   }
 
+  /**
+   * Signs with an email and password
+   * @param email e-mail
+   * @param password very strong password
+   */
   public static signInFromEmailAndPassword(email: string, password: string): Rx.Observable<LoggedUser> {
     if (!LoggedUser.initialized()) {
       throw "LoggedUser.auth property is missing";
@@ -136,8 +188,6 @@ export class LoggedUser extends User {
     if (fbuser) {
       let doc = LoggedUser.firestore.doc<UserSchema>("users/" + fbuser.uid);
       return doc.valueChanges().take(1).map((model: UserSchema) => {
-        console.log("MODELLLL");
-        console.log(model);
         return new LoggedUser(model, doc, fbuser);
       });
     }
@@ -152,37 +202,9 @@ export class LoggedUser extends User {
     return Rx.Observable.fromPromise(this.fbuser.delete());
   }
 
-  /**
-   * processAuthStateChange 
-   * @param fbuser 
-   */
-  private static processAuthStateChange(fbuser: firebase.User, index: number): Rx.Observable<LoggedUser> {
-    if (fbuser) {
-      let doc = LoggedUser.firestore.doc<UserSchema>("users/" + fbuser.uid);
-      return doc.valueChanges().take(1).map((model: UserSchema) => {
-        console.log("MODEL" + model);
-        return new LoggedUser(model, doc, fbuser);
-      });
-    }
-    return Rx.Observable.empty();
-  }
-
-  /*   private static processAuthStateChange1(fbuser: firebase.User, i: number): Rx.Observable<UserSchema> {
-      if (fbuser) {
-        let doc = LoggedUser.firestore.doc<UserSchema>("users/" + fbuser.uid);
-      }
-    }
-  
-    private static processAuthStateChange2(fbuser: firebase.User, um: UserSchema, fbindex: number, umindex: number) {
-      return new LoggedUser(um, ref, fbuser);
-    } */
-
   public constructor(model: UserSchema, doc: AngularFirestoreDocument<UserSchema>, fbuser: firebase.User) {
     super(model, doc, fbuser);
 
   }
 
-  private static initialized(): boolean {
-    return (LoggedUser.auth != null) && (LoggedUser.firestore != null);
-  }
 }
