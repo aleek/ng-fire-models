@@ -72,24 +72,10 @@ describe("User", () => {
       if (result) {
         done();
       }
-    })
-
-    /*       .subscribe((fbuser: boolean) => {
-            expect(fbuser).toBeTruthy();
-            done();
-          },
-          (error: string) => {
-            done.fail(error);
-          }); */
-    // @TODO merge those observables;
-    /*     srv.currentUser.subscribe((u: LoggedUser) => {
-          expect(u).not.toBeNull();
-          user = u;
-          done();
-        },
-          (error: any) => {
-            done.fail(error);
-          }); */
+    },
+    (error:any) => {
+      done.fail(error);
+    });
   });
 
   it("should delete user", (done: DoneFn) => {
