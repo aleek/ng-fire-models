@@ -53,11 +53,20 @@ describe("User", () => {
 
   let user: LoggedUser;
   it("should create user from email and password", (done: DoneFn) => {
-    var signup = LoggedUser.createNewFromEmailAndPassword("user1@example.com", "123456");
-    var luser = srv.currentUser
+    srv.createNewFromEmailAndPassword("user1@example.com", "123456")
+    .subscribe((success:boolean) => {
+      if (success) {
+        done();
+      }
+    }, (error:any) => {
+      done.fail(error);
+    });
+    
+/*     var luser = srv.currentUser
       .map((u: LoggedUser, index: number) => {
         if (u) {
           user = u;
+          console.log("BLA");
           return true;
         }
         else {
@@ -75,7 +84,7 @@ describe("User", () => {
     },
     (error:any) => {
       done.fail(error);
-    });
+    }); */
   });
 
   it("should delete user", (done: DoneFn) => {
@@ -92,9 +101,9 @@ describe("User", () => {
     }
   });
   it("should not create user with invalid email", (done: DoneFn) => {
-    LoggedUser.createNewFromEmailAndPassword("user1example.com", "123456")
-      .subscribe((fbuser: boolean) => {
-        expect(fbuser).not.toBeTruthy();
+    srv.createNewFromEmailAndPassword("user1example.com", "123456")
+      .subscribe((success: boolean) => {
+        expect(success).not.toBeTruthy();
         done();
       },
       (error: string) => {
