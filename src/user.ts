@@ -42,7 +42,7 @@ export class User {
     }
     this.uid = fbuser.uid;
 
-    doc.valueChanges().subscribe((mode:UserSchema) => {
+    doc.valueChanges().subscribe((mode: UserSchema) => {
       this.model = model;
     });
   }
@@ -107,13 +107,17 @@ export class User {
 export class LoggedUser extends User {
 
   protected model: UserSchema;
+  protected auth: AngularFireAuth;
 
-/*   private static auth: AngularFireAuth = null;
-  private static firestore: AngularFirestore; */
+  /*   private static auth: AngularFireAuth = null;
+    private static firestore: AngularFirestore; */
 
-  public constructor(model: UserSchema, doc: AngularFirestoreDocument<UserSchema>, fbuser: firebase.User) {
+  public constructor(model: UserSchema,
+    doc: AngularFirestoreDocument<UserSchema>,
+    fbuser: firebase.User,
+    auth: AngularFireAuth) {
     super(model, doc, fbuser);
-
+    this.auth = auth;
   }
 
   /**
@@ -124,15 +128,18 @@ export class LoggedUser extends User {
    * @param auth AngularFireAuth instance
    * @param firestore AngularFirestore instance
    */
-/*   public static initialize(auth: AngularFireAuth, firestore: AngularFirestore) {
-    LoggedUser.auth = auth;
-    LoggedUser.firestore = firestore;
+  /*   public static initialize(auth: AngularFireAuth, firestore: AngularFirestore) {
+      LoggedUser.auth = auth;
+      LoggedUser.firestore = firestore;
+    }
+  
+    private static initialized(): boolean {
+      return (LoggedUser.auth != null) && (LoggedUser.firestore != null);
+    } */
+
+  public logout():Observable<void> {
+    return Observable.fromPromise<void>(this.auth.auth.signOut());
   }
-
-  private static initialized(): boolean {
-    return (LoggedUser.auth != null) && (LoggedUser.firestore != null);
-  } */
-
 
 
   /**

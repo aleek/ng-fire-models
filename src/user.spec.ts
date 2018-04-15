@@ -52,6 +52,7 @@ describe("User", () => {
   });
 
   let user: LoggedUser;
+
   it("should create user from email and password", (done: DoneFn) => {
     var signup = srv.createNewFromEmailAndPassword("user1@example.com", "123456");
 
@@ -79,6 +80,33 @@ describe("User", () => {
       });
   });
 
+  it("should log out", (done: DoneFn) => {
+    user.logout().subscribe(() => done());
+  });
+
+  it("should not create user with invalid email", (done: DoneFn) => {
+    srv.createNewFromEmailAndPassword("user1example.com", "123456")
+      .subscribe((success: boolean) => {
+        expect(success).not.toBeTruthy();
+        done();
+      },
+      (error: string) => {
+        done();
+      });
+  });
+
+  xit("should log in", (done: DoneFn) => {
+    srv.signInWithEmailAndPassword("user1@example.com", "123456")
+      .subscribe((success: boolean) => {
+        if (success) {
+          done();
+        }
+      },
+      (error: any) => {
+        done.fail(error);
+      });
+  });
+
   it("should delete user", (done: DoneFn) => {
     if (user == null) {
       done();
@@ -92,16 +120,23 @@ describe("User", () => {
         });
     }
   });
-  it("should not create user with invalid email", (done: DoneFn) => {
-    srv.createNewFromEmailAndPassword("user1example.com", "123456")
-      .subscribe((success: boolean) => {
-        expect(success).not.toBeTruthy();
-        done();
-      },
-      (error: string) => {
-        done();
-      });
+
+  it("should change displayName property", (done: DoneFn) => {
+    var signup = srv.createNewFromEmailAndPassword("user1@example.com", "123456")
+      .subscribe(null, (error: any) => done.fail(error));
+
+    srv.currentUser.elementAt(0).subscribe((lu: LoggedUser) => {
+      lu.displayName = "Hanna Barbera";
+    });
+
+    srv.currentUser.elementAt(1).map((lu: LoggedUser) => {
+      expect(lu.displayName).toEqual("Hanna Barbera");
+      return lu.deleteAccount();
+    }).subscribe(() => done());
   });
+
+
+});
 
   /*   it("shoudl obtain user info", (done: DoneFn) => {
     }); */
@@ -130,7 +165,6 @@ describe("User", () => {
       expect(u).toThrowError(Error);
     }); */
 
-});
 
 /* it("should create corresponding Firestore entry, after creating a user", (done: DoneFn) => {
   var obs = LoggedUser.createNewFromEmailAndPassword("aledutk2o@com.pl", "123456");

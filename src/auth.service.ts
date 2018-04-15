@@ -35,8 +35,9 @@ export class AuthService {
 
         this.currentUserObservable.subscribe((user: LoggedUser) => {
             this._currentUser = user;
+        }, (error: any) => {
+            console.log("Error obtaining User object");
         });
-
     }
 
     get currentUser(): Rx.Observable<LoggedUser> {
@@ -98,9 +99,13 @@ export class AuthService {
     public fromFirebaseUser(fbuser: firebase.User): Rx.Observable<LoggedUser> {
         if (fbuser) {
             let doc = this.firestore.doc<UserSchema>("users/" + fbuser.uid);
-            return doc.valueChanges().map((model: UserSchema) => {
-                return new LoggedUser(model, doc, fbuser);
-            });
+            return doc.valueChanges()
+                .filter((model: UserSchema) => {
+                    return model != null;
+                })
+                .map((model: UserSchema) => {
+                    return new LoggedUser(model, doc, fbuser, this.auth);
+                });
         }
         return Rx.Observable.empty();
     }
