@@ -6,7 +6,8 @@ module.exports = function (config) {
 
         files: [
             { pattern: "base.spec.ts" },
-            { pattern: "src/*.+(ts|html)" }
+            { pattern: "src/*.+(ts|html)" },
+            { pattern: "assets/*.png", watched: false, included: false, served: true, nocache: false}
         ],
 
         preprocessors: {

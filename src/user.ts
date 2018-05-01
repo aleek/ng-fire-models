@@ -1,3 +1,4 @@
+import { AngularFireStorage } from 'angularfire2/storage';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireObject } from 'angularfire2/database/interfaces';
 import { AngularFirestore, AngularFirestoreDocument } from 'angularfire2/firestore';
@@ -7,6 +8,7 @@ import * as firebase from 'firebase/app'
 
 import { UserSchema } from "./schema"
 //import { Observable } from 'rxjs/Observable';
+import { UploadService, UploadTask } from './upload.service';
 import * as Rx from 'rxjs/Rx';
 import { Observable } from 'rxjs/Observable';
 
@@ -108,6 +110,7 @@ export class LoggedUser extends User {
 
   protected model: UserSchema;
   protected auth: AngularFireAuth;
+  protected uploadService:UploadService;
 
   /*   private static auth: AngularFireAuth = null;
     private static firestore: AngularFirestore; */
@@ -115,32 +118,17 @@ export class LoggedUser extends User {
   public constructor(model: UserSchema,
     doc: AngularFirestoreDocument<UserSchema>,
     fbuser: firebase.User,
-    auth: AngularFireAuth) {
+    auth: AngularFireAuth,
+    uploadService:UploadService) {
     super(model, doc, fbuser);
     this.auth = auth;
+    this.uploadService = uploadService;
+    console.debug("Created new LoggedUser object");
   }
-
-  /**
-   * The class must be initialized before using. This is not very clean solution
-   * and we need to implement better one.
-   * Currently, initialization is done by AuthService
-   * @TODO implement better solution
-   * @param auth AngularFireAuth instance
-   * @param firestore AngularFirestore instance
-   */
-  /*   public static initialize(auth: AngularFireAuth, firestore: AngularFirestore) {
-      LoggedUser.auth = auth;
-      LoggedUser.firestore = firestore;
-    }
-  
-    private static initialized(): boolean {
-      return (LoggedUser.auth != null) && (LoggedUser.firestore != null);
-    } */
 
   public logout():Observable<void> {
     return Observable.fromPromise<void>(this.auth.auth.signOut());
   }
-
 
   /**
    * @todo remomber to support reauthenticate user
@@ -159,6 +147,30 @@ export class LoggedUser extends User {
     if (n == this.model.displayname) return;
 
     this.doc.update({ displayname: n });
+  }
+
+  get avatar():Blob {
+    //return this.model.photo;
+    return null;
+  }
+
+  private userAvatarDir:string = "/users/avatars";
+  public  setAvatar(p:Blob) {
+    let task:UploadTask = this.uploadService.upload(`/users/avatars/abc.png`, p);
+    task.downloadUrl.subscribe((url:string)=> {
+      this.avatarUrl = url;
+    });
+    return task;
+  }
+
+  get avatarUrl():string {
+    return this.model.photo;
+  }
+
+  set avatarUrl(url:string) {
+    if (url == this.model.photo) return;
+
+    this.doc.update({ photo: url });
   }
 
 }

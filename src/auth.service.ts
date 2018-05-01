@@ -1,3 +1,4 @@
+import { UploadService } from './upload.service';
 import { LoggedUser } from './user';
 import { Injectable } from '@angular/core';
 import * as Rx from 'rxjs/Rx';
@@ -7,6 +8,7 @@ import * as firebase from 'firebase/app'
 import { Observable } from 'rxjs/Observable';
 
 import { UserSchema } from "./schema"
+import { AngularFireStorage } from 'angularfire2/storage';
 
 interface Error {
     code: string;
@@ -19,14 +21,9 @@ export class AuthService {
 
     private currentUserObservable: Rx.Observable<LoggedUser>;
 
-    private auth: AngularFireAuth;
-    private firestore: AngularFirestore;
-
-    constructor(auth: AngularFireAuth, firestore: AngularFirestore) {
-        this.auth = auth;
-        this.firestore = firestore;
-
-        //LoggedUser.initialize(auth, firestore);
+    constructor(private auth: AngularFireAuth,
+        private firestore: AngularFirestore,
+        private uploadServie: UploadService) {
 
         this.currentUserObservable = this.auth.authState.mergeMap(this.fromFirebaseUser.bind(this),
             (fbuser: firebase.User, user: LoggedUser, fi: number, ui: number) => {
@@ -50,6 +47,7 @@ export class AuthService {
      * @param password password
      */
     public createNewFromEmailAndPassword(email: string, password: string): Rx.Observable<boolean> {
+        console.debug("Creating new user...");
         return <Observable<boolean>>Observable.fromPromise(this.auth.auth.createUserWithEmailAndPassword(email, password))
             .map((fbuser: firebase.User) => {
                 if (fbuser) {
@@ -97,14 +95,17 @@ export class AuthService {
     }
 
     public fromFirebaseUser(fbuser: firebase.User): Rx.Observable<LoggedUser> {
+        console.debug("from firebase user");
         if (fbuser) {
             let doc = this.firestore.doc<UserSchema>("users/" + fbuser.uid);
             return doc.valueChanges()
                 .filter((model: UserSchema) => {
+                    if (model == null) console.debug("NULL MODEL")
+                    else console.debug("NOT NULL MODEL");
                     return model != null;
                 })
                 .map((model: UserSchema) => {
-                    return new LoggedUser(model, doc, fbuser, this.auth);
+                    return new LoggedUser(model, doc, fbuser, this.auth, this.uploadServie);
                 });
         }
         return Rx.Observable.empty();
