@@ -1,3 +1,10 @@
+/**
+ * Copyright (C) Sztajfa Aleksander Dutkowski - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential
+ * Written by Aleksander Dutkowski <adutkowski@sztajfa.cc>, May 2018
+ */
+
 import { AuthService } from './auth.service';
 import { AngularFirestoreModule, AngularFirestore } from 'angularfire2/firestore';
 import { FirebaseApp, FirebaseAppConfig, AngularFireModule } from 'angularfire2';
