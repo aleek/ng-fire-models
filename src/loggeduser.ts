@@ -4,6 +4,21 @@
  * Proprietary and confidential
  * Written by Aleksander Dutkowski <adutkowski@sztajfa.cc>, May 2018
  */
+import { User } from "./user"
+import { AngularFireStorage } from 'angularfire2/storage';
+import { AngularFireAuth } from 'angularfire2/auth';
+import { AngularFireObject } from 'angularfire2/database/interfaces';
+import { AngularFirestore, AngularFirestoreDocument } from 'angularfire2/firestore';
+import { DocumentReference } from '@firebase/firestore-types'
+
+import * as firebase from 'firebase/app'
+
+import { UserSchema } from "./schema"
+//import { Observable } from 'rxjs/Observable';
+import { UploadService, UploadTask } from './upload.service';
+import * as Rx from 'rxjs/Rx';
+import { Observable } from 'rxjs/Observable';
+
 
 /*
  * Due to the bug in TypeScript implementation, we must copy all getters from parent class.
@@ -15,9 +30,6 @@ export class LoggedUser extends User {
   protected model: UserSchema;
   protected auth: AngularFireAuth;
   protected uploadService:UploadService;
-
-  /*   private static auth: AngularFireAuth = null;
-    private static firestore: AngularFirestore; */
 
   public constructor(model: UserSchema,
     doc: AngularFirestoreDocument<UserSchema>,
@@ -35,7 +47,7 @@ export class LoggedUser extends User {
   }
 
   /**
-   * @todo remomber to support reauthenticate user
+   * @todo remember to support reauthenticate user
    * https://firebase.google.com/docs/auth/web/manage-users#re-authenticate_a_user
    */
   public deleteAccount(): Rx.Observable<any> {
@@ -58,7 +70,7 @@ export class LoggedUser extends User {
     return null;
   }
 
-  private userAvatarDir:string = "/users/avatars";
+  private readonly userAvatarDir:string = "/users/avatars";
   public  setAvatar(p:Blob) {
     let task:UploadTask = this.uploadService.upload(`/users/avatars/abc.png`, p);
     task.downloadUrl.subscribe((url:string)=> {
@@ -76,5 +88,4 @@ export class LoggedUser extends User {
 
     this.doc.update({ photo: url });
   }
-
 }

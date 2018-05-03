@@ -10,14 +10,11 @@ import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireObject } from 'angularfire2/database/interfaces';
 import { AngularFirestore, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { DocumentReference } from '@firebase/firestore-types'
-
+import { Observable } from 'rxjs/Observable';
 import * as firebase from 'firebase/app'
 
 import { UserSchema } from "./schema"
-//import { Observable } from 'rxjs/Observable';
 import { UploadService, UploadTask } from './upload.service';
-import * as Rx from 'rxjs/Rx';
-import { Observable } from 'rxjs/Observable';
 
 /**
  * Habababa
@@ -26,16 +23,16 @@ export class User {
   /*
    * Instance of AngularFire db
    */
-  public static afs: AngularFirestore; // = null;
+  public static afs: AngularFirestore;
 
   private uid: string;
 
 
-  public static getById(id: string): Rx.Observable<User> {
-    return Rx.Observable.empty();
+  public static getById(id: string): Observable<User> {
+    return Observable.empty();
   }
 
-  public static getByNameId(nameid: string): Rx.Observable<User> {
+  public static getByNameId(nameid: string): Observable<User> {
     return null;
   }
 

@@ -5,17 +5,17 @@
  * Written by Aleksander Dutkowski <adutkowski@sztajfa.cc>, May 2018
  */
 
-import { UploadService } from './upload.service';
-import { LoggedUser } from './user';
 import { Injectable } from '@angular/core';
-import * as Rx from 'rxjs/Rx';
 import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFirestore } from 'angularfire2/firestore';
+import { AngularFireStorage } from 'angularfire2/storage';
 import * as firebase from 'firebase/app'
 import { Observable } from 'rxjs/Observable';
+import * as Rx from 'rxjs/Rx';
 
 import { UserSchema } from "./schema"
-import { AngularFireStorage } from 'angularfire2/storage';
+import { UploadService } from './upload.service';
+import { LoggedUser } from './loggeduser';
 
 interface Error {
     code: string;
