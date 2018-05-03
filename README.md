@@ -1,5 +1,5 @@
 # ng fire test models
-
+[![Build Status](https://travis-ci.org/aleek/ng-fire-models.svg?branch=master)](https://travis-ci.org/aleek/ng-fire-models)
 ## What is this?
 So while developing my angular2 and firebase based project, I decided to move all MVC Models to separate repository, and test it with karma and jasmine.
 The issue was, models depend on Angularfire2, which depends on Angular2. It was quite hard to make such a configuration, where both Angular and Angularfire are external dependencies (instead of being in this repository). Finally, I've found example on karma-typescript (https://github.com/monounity/karma-typescript/tree/master/examples/angular2).
