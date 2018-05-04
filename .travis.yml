@@ -27,16 +27,7 @@ branches:
     - master # otherwise pull requests get built twice
 
 install:
-  - |
-    if $CANARY; then
-      yarn upgrade && yarn add firebase@canary
-    else
-      if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then
-        yarn upgrade
-      else
-        yarn install --frozen-lockfile
-      fi
-    fi
+  - yarn install --frozen-lockfile
 
 script:
   - ./node_modules/.bin/karma start --single-run --browsers ChromeHeadlessTravis --reporters mocha
