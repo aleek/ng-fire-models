@@ -30,4 +30,4 @@ install:
   - yarn install --frozen-lockfile
 
 script:
-  - ./node_modules/.bin/karma start --single-run --browsers ChromeHeadless --reporters mocha
+  - ./node_modules/.bin/karma start --single-run --browsers ChromeHeadlessTravis --reporters mocha
