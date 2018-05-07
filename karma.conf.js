@@ -37,11 +37,15 @@ module.exports = function (config) {
         //logLevel: config.LOG_DEBUG,
         singleRun: true,
 
-        //reporters: ["dots", "karma-typescript"],
         reporters: ['mocha'],
 
-        browsers: ["ChromeHeadless"]
-        //browsers: ["Chrome"]
+        browsers: ["ChromeHeadless"],
+        customLaunchers: {
+            ChromeHeadlessTravis: {
+                base: 'ChromeHeadless',
+                flags: ['--no-sandbox']
+            }
+        },
 
     });
 };
