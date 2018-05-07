@@ -22,6 +22,7 @@ import { environment } from './environment'
 declare let Zone: any;
 
 describe("Auth", () => {
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
   let app: FBApp;
   let afstore: AngularFirestore;
   let afauth: AngularFireAuth;

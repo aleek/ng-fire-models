@@ -27,6 +27,12 @@ import { UploadService, UploadTask } from './upload.service';
 declare let Zone: any;
 
 describe("LoggedUser", () => {
+    /**
+     * Set long time for triggering Firebase Cloud Functions,
+     * because they might be in cold state:
+     * https://stackoverflow.com/a/42727012/1062491
+     */
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
     let app: FBApp;
     let afs: AngularFirestore;
     let auth: AngularFireAuth;
@@ -109,7 +115,7 @@ describe("LoggedUser", () => {
 
 
 
-    xit("should change displayName property", (done: DoneFn) => {
+    it("should change displayName property", (done: DoneFn) => {
         var signup = srv.createNewFromEmailAndPassword("displayname@example.com", "123456")
             .subscribe(null, (error: any) => done.fail(error));
 
