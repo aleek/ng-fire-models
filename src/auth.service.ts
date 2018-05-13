@@ -35,9 +35,9 @@ export class AuthService {
         this.currentUserObservable = this.auth.authState.mergeMap(this.fromFirebaseUser.bind(this),
             (fbuser: firebase.User, user: LoggedUser, fi: number, ui: number) => {
                 return user;
-            }).share();
+            });
 
-        this.currentUserObservable.subscribe((user: LoggedUser) => {
+        this.currentUserObservable.share().subscribe((user: LoggedUser) => {
             this._currentUser = user;
         }, (error: any) => {
             console.log("Error obtaining User object");
@@ -45,7 +45,7 @@ export class AuthService {
     }
 
     get currentUser(): Rx.Observable<LoggedUser> {
-        return this.currentUserObservable;
+        return this.currentUserObservable.share();
     }
 
     /**
@@ -54,7 +54,6 @@ export class AuthService {
      * @param password password
      */
     public createNewFromEmailAndPassword(email: string, password: string): Rx.Observable<boolean> {
-        console.debug("Creating new user...");
         return <Observable<boolean>>Observable.fromPromise(this.auth.auth.createUserWithEmailAndPassword(email, password))
             .map((fbuser: firebase.User) => {
                 if (fbuser) {
@@ -102,13 +101,10 @@ export class AuthService {
     }
 
     public fromFirebaseUser(fbuser: firebase.User): Rx.Observable<LoggedUser> {
-        console.debug("from firebase user");
         if (fbuser) {
             let doc = this.firestore.doc<UserSchema>("users/" + fbuser.uid);
             return doc.valueChanges()
                 .filter((model: UserSchema) => {
-                    if (model == null) console.debug("NULL MODEL")
-                    else console.debug("NOT NULL MODEL");
                     return model != null;
                 })
                 .map((model: UserSchema) => {

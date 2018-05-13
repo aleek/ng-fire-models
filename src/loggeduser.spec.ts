@@ -23,6 +23,7 @@ import { LoggedUser } from './loggeduser';
 import { environment } from './environment'
 import { UserSchema } from './schema';
 import { UploadService, UploadTask } from './upload.service';
+import { downloadFile, readFileAsBinString } from './utils';
 
 declare let Zone: any;
 
@@ -32,7 +33,7 @@ describe("LoggedUser", () => {
      * because they might be in cold state:
      * https://stackoverflow.com/a/42727012/1062491
      */
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
     let app: FBApp;
     let afs: AngularFirestore;
     let auth: AngularFireAuth;
@@ -78,179 +79,58 @@ describe("LoggedUser", () => {
                 uploadSrv = _up;
             })();
 
-        srv.createNewFromEmailAndPassword("testuser1@example.com", "123456")
-            .subscribe((success: boolean) => { console.debug("success!") }, done.fail);
+        srv.createNewFromEmailAndPassword("logged.user.spec@example.com", "123456")
+            .subscribe(null, done.fail);
         srv.currentUser.take(1).subscribe((u: LoggedUser) => {
             user = u;
             done()
         }, done.fail);
-        /*         Observable.zip(srv.createNewFromEmailAndPassword("testuser1@example.com", "123456"),
-                    srv.currentUser,
-                    (success: boolean, _user: LoggedUser) => {
-                        if(success) {
-                            console.debug("SUCCESS!");
-                            user = _user;
-                        }
-                        else {
-                            console.debug("FAILE!");
-                            Observable.throw(":(((");
-                        }
-                    }).subscribe(done, done.fail); */
     });
 
-    afterEach((done:DoneFn) => {
-/*         user.deleteAccount().subscribe(null, null);
-        app.delete();
-        done(); */
-        Observable.concat(user.deleteAccount().take(1), Observable.fromPromise(app.delete()).take(1))
-            .subscribe(done, done.fail);
+    afterEach((done: DoneFn) => {
+        user.deleteAccount().mergeMap(() => {
+            return Observable.fromPromise(app.delete()).take(1);
+        })
+            .subscribe(() => {
+                done()
+            }
+            , done.fail);
     });
 
     // Ensure we've got an initialized app
     it("receives an initialized app from firebase", () => expect(app).not.toBe(null));
 
-    it("should be true", () => {
-        expect(true).toBe(true);
-    });
-
-
-
     it("should change displayName property", (done: DoneFn) => {
-        var signup = srv.createNewFromEmailAndPassword("displayname@example.com", "123456")
-            .subscribe(null, (error: any) => done.fail(error));
-
         srv.currentUser.elementAt(0).subscribe((lu: LoggedUser) => {
             lu.displayName = "Hanna Barbera";
         });
 
         srv.currentUser.elementAt(1).map((lu: LoggedUser) => {
             expect(lu.displayName).toEqual("Hanna Barbera");
-            return lu.deleteAccount();
-        }).subscribe(() => done());
+        }).subscribe(done, done.fail);
     });
 
-    xit("should change photo property", (done: DoneFn) => {
+    it("should change photo property", (done: DoneFn) => {
+        let originalPicture: Blob;
 
-        srv.createNewFromEmailAndPassword("photo@example.com", "123456")
-            .subscribe(null, (error: any) => done.fail(error));
+        downloadFile("base/assets/karma.png").map((pic: Blob) => {
+            originalPicture = pic
+            return user.setAvatar(pic);
+        }).mergeMap((task: UploadTask) => {
+            return task.downloadUrl;
+        })
+        .mergeMap((url: string) => {
+            return downloadFile(url);
+        })
+        .mergeMap((pic2: Blob) => {
+            return readFileAsBinString(pic2)
+        })
+        .mergeMap((pic2: string) => {
+            return readFileAsBinString(originalPicture);
+        }, (pic2: string, pic1: string) => {
+            if (pic1 == pic2) return Observable.empty()
+            else return Observable.throw("Pictures differ");
+        }).subscribe(done, done.fail);
 
-        var downloadPicture: () => Observable<Blob> = () => {
-            return Observable.create((observer: Observer<Blob>) => {
-                var url = "base/assets/karma.png";
-                var xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = () => {
-                    if (xhr.readyState === 4) {
-                        if (xhr.status === 200) {
-                            //var b = new Blob([xhr.response], { type: "image/png" });
-                            observer.next(xhr.response);
-                            observer.complete();
-                        } else {
-                            observer.error(xhr.status);
-                        }
-                    }
-                }
-                xhr.open("GET", url, true);
-                xhr.responseType = "blob";
-                xhr.send(null);
-            });
-        }
-        Observable.zip(srv.currentUser, downloadPicture(),
-            (currentUser: LoggedUser, pic: Blob) => {
-                console.debug("picture received");
-                return currentUser.setAvatar(pic);
-            }).mergeMap((task: UploadTask) => {
-                return task.downloadUrl;
-            }, (_: any, url: string) => {
-                console.debug(url);
-            }).subscribe(done, done.fail);
-        /*     try {
-            bla.mergeMap((task:UploadTask) => {
-              console.debug("picture uploaded");
-              return task.downloadUrl;
-            }, (task:UploadTask, url:string) => {
-              console.log(url);
-              done();
-            })
-            }
-            catch(err) {
-              console.error(err);
-            } */
-        /*     srv.currentUser.elementAt(0).subscribe((lu: LoggedUser) => {
-              lu.avatarUrl = "/assets/photo.png";
-            });
-        
-            srv.currentUser.elementAt(1).map((lu: LoggedUser) => {
-              expect(lu.photo).toEqual("/assets/photo.png");
-              return lu.deleteAccount();
-            }).subscribe(() => done()); */
-    }, 20000);
-
-
+    });
 });
-
-  /*   it("shoudl obtain user info", (done: DoneFn) => {
-    }); */
-
-  /*   it("should delete add users", (done: DoneFn) => {
-      let nextPageToken;
-      adminApp.auth().listUsers(10, nextPageToken).then((listUserResults: admin.auth.ListUsersResult) => {
-        listUserResults.users.forEach(function (userRecord) {
-          console.debug(userRecord.toJSON());
-        });
-  
-        done();
-      }).catch(function (error) {
-        console.log("Error listing users:", error);
-        done();
-      });
-  
-    });
-  
-  
-    it("should not create empty User", () => {
-      var u = function () {
-        return new User(null, null, null);
-      };
-  
-      expect(u).toThrowError(Error);
-    }); */
-
-
-/* it("should create corresponding Firestore entry, after creating a user", (done: DoneFn) => {
-  var obs = LoggedUser.createNewFromEmailAndPassword("aledutk2o@com.pl", "123456");
-  let user;
-  let doc = obs.mergeMap((fbuser: firebase.User) => {
-    expect(fbuser).not.toBeNull();
-    let doc = afs.doc<UserSchema>("users/" + fbuser.uid);
-    return doc.valueChanges().take(1);
-
-    //fbuser.delete(); // this is async
-    //done();
-  }, (fbuser: firebase.User, model: UserSchema, fi: number, ui: number) => {
-    user = fbuser;
-    return model;
-  });
-
-  doc.subscribe((model: UserSchema) => {
-    console.log(model);
-  },
-    (error: any) => {
-      done.fail(error)
-    });
-  /*     ,
-        (error: any) => {
-          done.fail(error);
-        }); 
-}); */
-
-
-//});
-
-
-
-    /*     it("should should sign in example user", () => {
-          LoggedUser.initialize(auth, afs);
-          LoggedUser.signInFromEmailAndPassword("aleek@com.pl", "1234");
-    
-        }) */
-

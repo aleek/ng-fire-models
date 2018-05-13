@@ -39,7 +39,6 @@ export class LoggedUser extends User {
     super(model, doc, fbuser);
     this.auth = auth;
     this.uploadService = uploadService;
-    console.debug("Created new LoggedUser object");
   }
 
   public logout():Observable<void> {
@@ -73,9 +72,9 @@ export class LoggedUser extends User {
   private readonly userAvatarDir:string = "/users/avatars";
   public  setAvatar(p:Blob) {
     let task:UploadTask = this.uploadService.upload(`/users/avatars/abc.png`, p);
-    task.downloadUrl.subscribe((url:string)=> {
+/*     task.downloadUrl.subscribe((url:string)=> {
       this.avatarUrl = url;
-    });
+    }); */
     return task;
   }
 
