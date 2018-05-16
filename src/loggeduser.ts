@@ -29,19 +29,19 @@ export class LoggedUser extends User {
 
   protected model: UserSchema;
   protected auth: AngularFireAuth;
-  protected uploadService:UploadService;
+  protected uploadService: UploadService;
 
   public constructor(model: UserSchema,
     doc: AngularFirestoreDocument<UserSchema>,
     fbuser: firebase.User,
     auth: AngularFireAuth,
-    uploadService:UploadService) {
+    uploadService: UploadService) {
     super(model, doc, fbuser);
     this.auth = auth;
     this.uploadService = uploadService;
   }
 
-  public logout():Observable<void> {
+  public logout(): Observable<void> {
     return Observable.fromPromise<void>(this.auth.auth.signOut());
   }
 
@@ -64,25 +64,25 @@ export class LoggedUser extends User {
     this.doc.update({ displayname: n });
   }
 
-  get avatar():Blob {
+  get avatar(): Blob {
     //return this.model.photo;
     return null;
   }
 
-  private readonly userAvatarDir:string = "/users/avatars";
-  public  setAvatar(p:Blob) {
-    let task:UploadTask = this.uploadService.upload(`/users/avatars/abc.png`, p);
-/*     task.downloadUrl.subscribe((url:string)=> {
+  private readonly userAvatarDir: string = "/users/avatars";
+  public setAvatar(p: Blob) {
+    let task: UploadTask = this.uploadService.upload(`/users/avatars/abc.png`, p);
+    task.downloadUrl.subscribe((url: string) => {
       this.avatarUrl = url;
-    }); */
+    });
     return task;
   }
 
-  get avatarUrl():string {
+  get avatarUrl(): string {
     return this.model.photo;
   }
 
-  set avatarUrl(url:string) {
+  set avatarUrl(url: string) {
     if (url == this.model.photo) return;
 
     this.doc.update({ photo: url });

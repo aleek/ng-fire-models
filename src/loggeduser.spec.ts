@@ -111,26 +111,58 @@ describe("LoggedUser", () => {
     });
 
     it("should change photo property", (done: DoneFn) => {
-        let originalPicture: Blob;
+        let originalImage: Blob;
+        let dlUrl:string;
 
-        downloadFile("base/assets/karma.png").map((pic: Blob) => {
-            originalPicture = pic
-            return user.setAvatar(pic);
+        let img = downloadFile("base/assets/karma.png").map((img: Blob) => {
+            originalImage = img;
+            return user.setAvatar(img);
         }).mergeMap((task: UploadTask) => {
             return task.downloadUrl;
         })
         .mergeMap((url: string) => {
+            dlUrl = url;
             return downloadFile(url);
         })
-        .mergeMap((pic2: Blob) => {
-            return readFileAsBinString(pic2)
+        .mergeMap((img: Blob) => {
+            return readFileAsBinString(img);
         })
-        .mergeMap((pic2: string) => {
-            return readFileAsBinString(originalPicture);
-        }, (pic2: string, pic1: string) => {
-            if (pic1 == pic2) return Observable.empty()
-            else return Observable.throw("Pictures differ");
-        }).subscribe(done, done.fail);
+        .mergeMap((img2: string) => {
+            return readFileAsBinString(originalImage);
+        }, (img2: string, img1: string) => {
+            return {img1: img1, img2: img2};
+        }).take(1);
+
+        let url = srv.currentUser.map((u:LoggedUser) => {
+            return u.avatarUrl;
+        }).filter((url:string) => {
+            return url != '' 
+         });
+        /*
+        * Since both Observable.empty() and Observable.throw()
+        * completes the chain, we can use skipUntil
+        */
+/*         let url = srv.currentUser.skipUntil(img).map(
+            (u:LoggedUser) => {
+                return u.avatarUrl == dlUrl;
+            }
+        ); */
+/*         .subscribe((even:boolean) => {
+            expect(even).toBeTruthy();
+        }); */
+
+        Observable.zip(img, url, (img:{img1:string, img2:string}, url:boolean) => {
+            return {img1: img.img1, img2: img.img2, url:url};
+        })
+        .subscribe((v:{img1:string, img2:string, url:boolean}) => {
+            expect(v.img1).toEqual(v.img2);
+            expect(v.url).toBeTruthy();
+            done();
+        },done.fail); 
+/*         let url = srv.currentUser.filter((u:LoggedUser, i:number) => {
+            return u.avatarUrl != null && u.avatarUrl != '';
+        }); */
+
 
     });
 });
