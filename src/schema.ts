@@ -5,9 +5,16 @@
  * Written by Aleksander Dutkowski <adutkowski@sztajfa.cc>, May 2018
  */
 
+ /**
+  * 
+  */
+
 import { Constraints, ConstraintsTypes} from 'validate.js';
 import { DocumentReference} from '@firebase/firestore-types'
 
+/**
+ * Represents User, using our service.
+ */
 export interface UserSchema {
   displayname: string;
 
@@ -16,7 +23,7 @@ export interface UserSchema {
 
   /* user or organization */
   type: string;
-  photo: string;
+  avatar: string;
   location: string;
   birthday: string;
   gender: string;

@@ -79,7 +79,7 @@ describe("LoggedUser", () => {
                 uploadSrv = _up;
             })();
 
-        srv.createNewFromEmailAndPassword("logged.user.spec@example.com", "123456")
+        srv.createNewFromEmailAndPassword( "LoggedUserSpec", "logged.user.spec@example.com", "123456")
             .subscribe(null, done.fail);
         srv.currentUser.take(1).subscribe((u: LoggedUser) => {
             user = u;
@@ -116,7 +116,8 @@ describe("LoggedUser", () => {
 
         let img = downloadFile("base/assets/karma.png").map((img: Blob) => {
             originalImage = img;
-            return user.setAvatar(img);
+            user.avatar = img;
+            return user.avatarUploadTask;
         }).mergeMap((task: UploadTask) => {
             return task.downloadUrl;
         })

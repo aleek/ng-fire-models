@@ -56,3 +56,10 @@ export const addNewUserToFirestore = firebase.auth.user().onCreate((event:fireba
     return admin.firestore().collection('users').doc(u.uid).set(model)
 
 });
+
+export const deleteUserFromFirestore = firebase.auth.user().onDelete((event:firebase.Event<firebase.auth.UserRecord>) => {
+    var u:firebase.auth.UserRecord = event.data;
+    return admin.firestore().collection('users').doc(u.uid).delete();
+}
+
+)

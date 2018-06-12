@@ -10,14 +10,12 @@ import { AngularFireAuth } from 'angularfire2/auth';
 import { AngularFireObject } from 'angularfire2/database/interfaces';
 import { AngularFirestore, AngularFirestoreDocument } from 'angularfire2/firestore';
 import { DocumentReference } from '@firebase/firestore-types'
-
 import * as firebase from 'firebase/app'
+import { Observable } from 'rxjs/Observable';
 
 import { UserSchema } from "./schema"
-//import { Observable } from 'rxjs/Observable';
 import { UploadService, UploadTask } from './upload.service';
 import * as Rx from 'rxjs/Rx';
-import { Observable } from 'rxjs/Observable';
 
 
 /*
@@ -64,27 +62,89 @@ export class LoggedUser extends User {
     this.doc.update({ displayname: n });
   }
 
+  get nameId(): string {
+    return this.model.nameid;
+  }
+
+  set nameId(v: string) {
+    this.doc.update({ nameid: v });
+  }
+
+  get type(): string {
+    return this.model.type;
+  }
+
+  set type(v: string) {
+    this.doc.update({ type: v });
+  }
+
+  get location(): string {
+    return this.model.location;
+  }
+
+  set location(v: string) {
+    this.doc.update({ location: v });
+  }
+
+  get birthday(): string {
+    return this.model.birthday;
+  }
+
+  set birthday(v: string) {
+    this.doc.update({ birthday: v });
+  }
+
+  get gender(): string {
+    return this.model.gender;
+  }
+
+  set gender(v: string) {
+    this.doc.update({ gender: v });
+  }
+
+  get timezone(): string {
+    return this.model.timezone;
+  }
+
+  set timezone(v: string) {
+    this.doc.update({ timezone: v });
+  }
+
+  get bio(): string {
+    return this.model.bio;
+  }
+
+  set bio(v: string) {
+    this.doc.update({ bio: v });
+  }
+
+  get avatarUrl(): string {
+    return this.model.avatar;
+  }
+
+  set avatarUrl(v: string) {
+    this.doc.update({ avatar: v });
+  }
+
+  private _avatarUploadTask:UploadTask = null;
+  set avatar(v:Blob) {
+    this._avatarUploadTask = this.uploadService.upload(`/users/avatars/abc.png`, v);
+    this._avatarUploadTask.downloadUrl.share().subscribe((url: string) => {
+      this.avatarUrl = url;
+    });
+  }
+
   get avatar(): Blob {
     //return this.model.photo;
     return null;
   }
 
-  private readonly userAvatarDir: string = "/users/avatars";
-  public setAvatar(p: Blob) {
-    let task: UploadTask = this.uploadService.upload(`/users/avatars/abc.png`, p);
-    task.downloadUrl.subscribe((url: string) => {
-      this.avatarUrl = url;
-    });
-    return task;
+  get avatarUploadTask():UploadTask {
+    return this._avatarUploadTask;
   }
 
-  get avatarUrl(): string {
-    return this.model.photo;
-  }
+  set _model(v:Partial<UserSchema>) {
+    this.doc.update(v);
 
-  set avatarUrl(url: string) {
-    if (url == this.model.photo) return;
-
-    this.doc.update({ photo: url });
   }
 }

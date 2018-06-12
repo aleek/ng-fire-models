@@ -28,15 +28,24 @@ export class User {
   private uid: string;
 
 
+  /**
+   * Returns User with specyfic Hash ID
+   * @param id Hash ID of user
+   */
   public static getById(id: string): Observable<User> {
     return Observable.empty();
   }
 
+  /**
+   * Returns user with specyfic NameID - unique id based on his name
+   * @param nameid Unique NameID
+   */
   public static getByNameId(nameid: string): Observable<User> {
-    return null;
+    return Observable.empty();
   }
 
-  public constructor(protected model: UserSchema, protected doc: AngularFirestoreDocument<UserSchema>, protected fbuser: firebase.User) {
+  protected constructor(protected model: UserSchema, protected doc: AngularFirestoreDocument<UserSchema>,
+    protected fbuser: firebase.User) {
     if (model == null) {
       throw new Error("Cannot create User object with empty model parameter");
     }
@@ -47,10 +56,6 @@ export class User {
       throw new Error("Cannot create User object with empty fbuser parameter");
     }
     this.uid = fbuser.uid;
-
-    doc.valueChanges().subscribe((mode: UserSchema) => {
-      this.model = model;
-    });
   }
 
 
@@ -85,7 +90,7 @@ export class User {
    * Absolute path to avatar file
    */
   get photoUrl(): string {
-    return this.model.photo || "/assets/default-user-avatar.png";
+    return this.model.avatar || "/assets/default-user-avatar.png";
   }
 
   get birthday(): string {
