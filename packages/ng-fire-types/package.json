@@ -1,0 +1,29 @@
+{
+  "name": "ng-fire-types",
+  "version": "1.0.0",
+  "description": "Object types definitions for ng-fire-models",
+  "main": "index.ts",
+  "scripts": {
+    "test": "karma start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aleek/ng-fire-types.git"
+  },
+  "keywords": [
+    "angular2",
+    "firebase",
+    "firestore",
+    "mvc"
+  ],
+  "author": "Aleksander Dutkowski",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aleek/ng-fire-types/issues"
+  },
+  "homepage": "https://github.com/aleek/ng-fire-types#readme",
+  "dependencies": {
+    "@firebase/firestore-types": "^0.4.3",
+    "validate.js": "https://github.com/aleek/validate.js#typings"
+  }
+}
