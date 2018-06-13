@@ -21,7 +21,7 @@ import { AuthService } from './auth.service';
 import { User } from './user'
 import { LoggedUser } from './loggeduser';
 import { environment } from './environment'
-import { UserSchema } from './schema';
+import { UserSchema } from "../packages/ng-fire-types/user"
 import { UploadService, UploadTask } from './upload.service';
 
 declare let Zone: any;

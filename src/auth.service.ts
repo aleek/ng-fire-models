@@ -13,7 +13,7 @@ import * as firebase from "firebase/app";
 import { Observable } from "rxjs/Observable";
 import * as Rx from "rxjs/Rx";
 
-import { UserSchema } from "./schema";
+import { UserSchema } from "../packages/ng-fire-types/user";
 import { UploadService } from "./upload.service";
 import { LoggedUser } from "./loggeduser";
 import { DocumentSnapshot } from "@firebase/firestore-types";
@@ -60,7 +60,12 @@ export class AuthService {
   }
 
   /**
-   *
+   * `createNewFromEmailAndPassword` creates new user in the database
+   * with provided username, email and password.
+   * It returns Observable, which will return true only one,
+   * when operation is done, or throw an error.
+   * 
+   * @param name display name for user
    * @param email valid email address
    * @param password password
    */
@@ -73,24 +78,20 @@ export class AuthService {
       this.auth.auth.createUserWithEmailAndPassword(email, password)
     )
       .filter((fbuser: firebase.User) => {
-        console.log("Filter 1:", fbuser != null);
         return fbuser != null;
       })
       .mergeMap((fbuser: firebase.User) => {
-        console.log("2");
         return this.firestore
           .doc<UserSchema>("users/" + fbuser.uid)
           .snapshotChanges();
       })
       .filter((a: Action<DocumentSnapshot>) => {
-        console.log("Filter 2:", a.payload.exists);
           return a.payload.exists;
       })
       .map((a: Action<DocumentSnapshot>) => {
-        console.log("ACTION!");
           return Observable.fromPromise(a.payload.ref.update({ displayname: name }));
       })
-      .map(() => { return true; });
+      .map(() => { return true; }).take(1);
 
     /* 
           .update({ displayname: name });

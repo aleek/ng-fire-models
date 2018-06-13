@@ -82,7 +82,7 @@ describe("Auth", () => {
         }
       });
 
-    var success = signup.take(1).combineLatest(luser, (signUpSuccess: boolean, userSuccess: boolean) => {
+    var success = signup.combineLatest(luser, (signUpSuccess: boolean, userSuccess: boolean) => {
       return signUpSuccess && userSuccess;
     }).subscribe((result: boolean) => {
       if (result) {
@@ -93,8 +93,13 @@ describe("Auth", () => {
       );
   }, 10000);
 
-  xit("should set proper name for a new user", (done:DoneFn) => {
-    auth.currentUser.subscribe((u:LoggedUser) => {
+  it("should set proper name for a new user", (done:DoneFn) => {
+    auth.currentUser.filter((u:LoggedUser) => {
+      return u.displayName != '' && u.displayName != undefined;
+    })
+    .timeout(8000)
+    .subscribe((u:LoggedUser) => {
+      //console.log(u.model)
       expect(u.displayName).toEqual("user1");
       done();
     }, done.fail);

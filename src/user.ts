@@ -13,7 +13,7 @@ import { DocumentReference } from '@firebase/firestore-types'
 import { Observable } from 'rxjs/Observable';
 import * as firebase from 'firebase/app'
 
-import { UserSchema } from "./schema"
+import { UserSchema } from "../packages/ng-fire-types/user"
 import { UploadService, UploadTask } from './upload.service';
 
 /**

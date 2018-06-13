@@ -13,7 +13,7 @@ import { DocumentReference } from '@firebase/firestore-types'
 import * as firebase from 'firebase/app'
 import { Observable } from 'rxjs/Observable';
 
-import { UserSchema } from "./schema"
+import { UserSchema } from "../packages/ng-fire-types/user"
 import { UploadService, UploadTask } from './upload.service';
 import * as Rx from 'rxjs/Rx';
 
@@ -25,7 +25,7 @@ import * as Rx from 'rxjs/Rx';
  */
 export class LoggedUser extends User {
 
-  protected model: UserSchema;
+  public model: UserSchema;
   protected auth: AngularFireAuth;
   protected uploadService: UploadService;
 
